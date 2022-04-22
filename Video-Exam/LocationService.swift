@@ -13,6 +13,8 @@ public class LocationService: NSObject, CLLocationManagerDelegate{
     public static var sharedInstance = LocationService()
     let locationManager: CLLocationManager
     
+    let horizontalAccuracyThreshhold = 100
+    
     override init() {
         locationManager = CLLocationManager()
         
@@ -59,7 +61,7 @@ public class LocationService: NSObject, CLLocationManagerDelegate{
                 return false
             }
             
-            if location.horizontalAccuracy > 100 {
+            if location.horizontalAccuracy > horizontalAccuracyThreshhold {
                 print("Location not accurate enough.")
                 return false
             }

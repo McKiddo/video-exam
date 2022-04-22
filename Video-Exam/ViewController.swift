@@ -19,7 +19,8 @@ class ViewController: UIViewController {
     
     private var motionManager: CMMotionManager!
     
-    private let rollThreshhold: Double = 3.0
+    private let yawThreshhold: Double = 1.5
+    private let pitchThreshhold: Double = 1.1
     
     @IBOutlet weak var playerView: UIView!
     
@@ -62,7 +63,7 @@ class ViewController: UIViewController {
 
         motionManager.gyroUpdateInterval = 0.1
 
-        motionManager.startDeviceMotionUpdates(to: .main) { (data, error) in
+        motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: .main) { (data, error) in
             if let data = data { self.handleRotation(for: data) }
         }
     }
@@ -70,13 +71,17 @@ class ViewController: UIViewController {
     // MARK: Data handlers
     
     private func handleRotation(for data: CMDeviceMotion) {
-        queuePlayer.volume = Float(data.attitude.pitch)
+        let pitch = data.attitude.pitch
+        let yaw = data.attitude.yaw
         
-        let zRate = data.rotationRate.z
-        if zRate.magnitude >= rollThreshhold {
-            seek(by: -zRate)
+        queuePlayer.volume = Float(pitch.magnitude)
+        
+        // Disable yaw controls when paused
+        if queuePlayer.timeControlStatus == .playing {
+            if yaw.magnitude >= yawThreshhold {
+                seek(by: -yaw / 5)
+            }
         }
-        
     }
     
     @objc private func locationUpdated() {
